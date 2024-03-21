@@ -1,0 +1,4 @@
+Flask
+flask-cors
+openai
+psycopg2-binary

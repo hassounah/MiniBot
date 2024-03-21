@@ -1,0 +1,50 @@
+.chat-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 50px;
+}
+
+.message-container {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    width: 80%;
+    margin-bottom: 20px;
+}
+
+.right-bubble {
+    background-color: #007bff;
+    color: white;
+    border-radius: 10px;
+    padding: 10px;
+    margin: 5px;
+    align-self: flex-end;
+    text-align: right; /* Align text to the right */
+    width: auto; /* Size bubble width to content */
+}
+
+.left-bubble {
+    background-color: #ced4da;
+    color: black;
+    border-radius: 10px;
+    padding: 10px;
+    margin: 5px;
+    align-self: flex-start;
+    width: auto; /* Size bubble width to content */
+}
+
+.spinner {
+    border: 5px solid #f3f3f3;
+    border-radius: 50%;
+    border-top: 5px solid #3498db;
+    width: 30px;
+    height: 30px;
+    animation: spin 1s linear infinite;
+    margin-bottom: 20px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}

@@ -10,6 +10,7 @@ const Config = () => {
     const [updatedModelDescription, setUpdatedModelDescription] = useState('');
     const [updatingModel, setUpdatingModel] = useState(null);
     const [activeModelId, setActiveModelId] = useState(null);
+    const [errorMessage, setErrorMessage] = useState('');
 
     useEffect(() => {
         fetchModels();
@@ -37,29 +38,41 @@ const Config = () => {
     const createModel = async () => {
         try {
             await axios.post('/api/models', { name: newModelName, description: newModelDescription });
-            fetchModels();
+            await fetchModels();
             // Reset new model fields to empty after creation
             setNewModelName('');
             setNewModelDescription('');
+            // Clear error message upon success
+            setErrorMessage('');
         } catch (error) {
-            console.error('Error creating model:', error);
+            if (error.response && error.response.status === 400) {
+                setErrorMessage('Invalid model name. Please provide a valid model name.');
+            } else {
+                console.error('Error creating model:', error);
+            }
         }
     };
 
     const updateModel = async (id, updatedName, updatedDescription) => {
         try {
             await axios.put(`/api/models/${id}`, { name: updatedName, description: updatedDescription });
-            fetchModels();
+            await fetchModels();
             setUpdatingModel(null);
+            // Clear error message upon success
+            setErrorMessage('');
         } catch (error) {
-            console.error('Error updating model:', error);
+            if (error.response && error.response.status === 400) {
+                setErrorMessage('Invalid model name. Please provide a valid model name.');
+            } else {
+                console.error('Error updating model:', error);
+            }
         }
     };
 
     const deleteModel = async (id) => {
         try {
             await axios.delete(`/api/models/${id}`);
-            fetchModels();
+            await fetchModels();
         } catch (error) {
             console.error('Error deleting model:', error);
         }
@@ -96,6 +109,7 @@ const Config = () => {
                 <input type="text" placeholder="Name" value={newModelName} onChange={(e) => setNewModelName(e.target.value)} />
                 <input type="text" placeholder="Description" value={newModelDescription} onChange={(e) => setNewModelDescription(e.target.value)} />
                 <button onClick={createModel}>Add Model</button>
+                {errorMessage && <div style={{ color: 'red' }}>{errorMessage}</div>}
             </div>
             <div>
                 <h2>All Models</h2>
@@ -109,6 +123,7 @@ const Config = () => {
                             <>
                                 <button onClick={() => updateModel(model.id, updatedModelName, updatedModelDescription)}>Update</button>
                                 <button onClick={cancelUpdateModel}>Cancel</button>
+                                {errorMessage && <div style={{ color: 'red' }}>{errorMessage}</div>}
                             </>
                             :
                             <>

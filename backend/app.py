@@ -1,7 +1,7 @@
 import time
 from flask import Flask, jsonify, request
 from flask_cors import CORS
-import openai
+from openai import OpenAI
 import os
 import psycopg2
 
@@ -9,7 +9,9 @@ import psycopg2
 app = Flask(__name__)
 CORS(app)
 
-openai.api_key = os.getenv('OPENAI_API_KEY')
+client = OpenAI(
+    api_key=os.environ['OPENAI_API_KEY'],  # this is also the default, it can be omitted
+)
 
 
 def connect_to_database():
@@ -93,12 +95,23 @@ initialize_database()
 
 def get_completion(prompt, active_model):
     messages = [{"role": "user", "content": prompt}]
-    response = openai.chat.completions.create(
+    response = client.chat.completions.create(
         model=active_model,
         messages=messages,
         temperature=0,
     )
     return response.choices[0].message.content
+
+
+def validate_model_name(model_name):
+    # Function to validate if the model name exists in OpenAI's available models
+    try:
+        models = client.models.list()
+        available_models = [model.id for model in models]
+        return model_name in available_models
+    except Exception as e:
+        print(f"Error validating model name: {e}")
+        return False
 
 
 @app.route('/api/messages', methods=['POST'])
@@ -145,6 +158,9 @@ def create_model():
     name = data.get('name', '')
     description = data.get('description', '')
 
+    if not validate_model_name(name):
+        return jsonify({'error': 'Invalid model name. Please provide a valid model name.'}), 400
+
     cur.execute("INSERT INTO models (name, description) VALUES (%s, %s)", (name, description))
     conn.commit()
 
@@ -156,6 +172,9 @@ def update_model(model_id):
     data = request.get_json()
     name = data.get('name', '')
     description = data.get('description', '')
+
+    if not validate_model_name(name):
+        return jsonify({'error': 'Invalid model name. Please provide a valid model name.'}), 400
 
     cur.execute("UPDATE models SET name = %s, description = %s WHERE id = %s", (name, description, model_id))
     conn.commit()
